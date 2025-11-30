@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Peta Evakuasi Tsunami - Palabuhanratu</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      background: #eef2f3;
+    }
+    h2 {
+      text-align: center;
+      background-color: #004d80;
+      color: white;
+      padding: 10px;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+    #map {
+      height: 600px;
+      margin: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .legend {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      line-height: 18px;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Peta Evakuasi Tsunami - Palabuhanratu</h2>
+  <div id="map"></div>
+
+  <script>
+    var map = L.map('map').setView([-6.988, 106.548], 13);
+
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    var satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains: ['mt0','mt1','mt2','mt3'],
+      attribution: '© Google Satellite'
+    });
+
+    var titikLayer = L.layerGroup().addTo(map);
+
+    // ===========================
+    // 4 ICON BERBEDA
+    // ===========================
+
+    var iconAlun = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/128/15705/15705112.png',
+      iconSize: [32, 32]
+    });
+
+    var iconBPBD = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/128/1518/1518379.png',
+      iconSize: [32, 32]
+    });
+
+    var iconSekolah = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/128/5404/5404967.png',
+      iconSize: [32, 32]
+    });
+
+    var iconLapangan = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/128/1202/1202941.png',
+      iconSize: [32, 32]
+    });
+
+    // ===========================
+    // TITIK EVAKUASI DENGAN ICON BERBEDA
+    // ===========================
+
+    var titikEvakuasi = [
+      { name: "Titik Evakuasi 1 - Alun-Alun Palabuhanratu", coords: [-6.9881, 106.5509], icon: iconAlun },
+      { name: "Titik Evakuasi 2 - BPBD Sukabumi", coords: [-6.9827, 106.5559], icon: iconBPBD },
+      { name: "Titik Evakuasi 3 - SMKN 1 Palabuhanratu", coords: [-6.9771, 106.5450], icon: iconSekolah },
+      { name: "Titik Evakuasi 4 - Lapang Badak Putih", coords: [-6.9844, 106.5519], icon: iconLapangan }
+    ];
+
+    titikEvakuasi.forEach(lokasi => {
+      L.marker(lokasi.coords, {icon: lokasi.icon})
+        .bindTooltip(lokasi.name)
+        .bindPopup(`<b>${lokasi.name}</b><br>Lokasi aman evakuasi tsunami.`)
+        .addTo(titikLayer);
+    });
+
+    // ===========================
+    // JALUR EVAKUASI
+    // ===========================
+
+    function buatJalurEvakuasi(coords, nama) {
+      return L.polyline(coords, { color: "blue", weight: 6 })
+        .bindTooltip(nama)
+        .addTo(map);
+    }
+
+    var jalur1 = buatJalurEvakuasi([
+      [-6.9883, 106.5509], 
+      [-6.9887, 106.5508], 
+      [-6.9877, 106.5448], 
+      [-6.9871, 106.5437]
+    ], "Jalur Evakuasi 1");
+
+    var jalur2 = buatJalurEvakuasi([
+      [-6.9833, 106.5562], [-6.9858, 106.5528], [-6.9881, 106.5509]
+    ], "Jalur Evakuasi 2");
+
+    var jalur3 = buatJalurEvakuasi([
+      [-6.9770, 106.5450], [-6.9792, 106.5404], [-6.9811, 106.5395]
+    ], "Jalur Evakuasi 3");
+
+    var jalur4 = buatJalurEvakuasi([
+      [-6.9858, 106.5434], [-6.9865, 106.5507], [-6.9844, 106.5519]
+    ], "Jalur Evakuasi 4");
+
+    // ===========================
+    // ZONA TSUNAMI 3 LEVEL
+    // ===========================
+
+    var zonaTinggi = L.polygon([
+      [-7.002916808170778, 106.54154515386834], 
+      [-6.99203739068323, 106.54619170064345], 
+      [-6.982952059074851, 106.54490201581638],
+      [-6.978619289036541, 106.53637552444677], 
+      [-6.978628287628494, 106.53116094396881],
+      [-6.979718526789244, 106.53231793648953],
+      [-6.981051839818244, 106.53302183767107],
+      [-6.981054911842846, 106.53411672302818],
+      [-6.980281215698021, 106.53562661354698],
+      [-6.982131591761627, 106.53765978742244],
+      [-6.986795154613375, 106.5421721492743],
+      [-6.991349385470874, 106.54043605782012],
+      [-6.991945210023785, 106.54154058831357],
+      [-6.996449619177551, 106.54264511902178]
+    ], { color: 'darkred', fillColor: 'red', fillOpacity: 0.6 }).addTo(map)
+      .bindPopup("Zona Tsunami Tinggi");
+
+    var zonaSedang = L.polygon([
+      [-7.002916808170778, 106.54154515386834], 
+      [-6.992420680217851, 106.54781574643445], 
+      [-6.981755596875542, 106.54615809045359],
+      [-6.977611907623991, 106.53651706771333],
+      [-6.978628287628494, 106.53116094396881],
+      [-6.978619289036541, 106.53637552444677],
+      [-6.982952059074851, 106.54490201581638],
+      [-6.99203739068323, 106.54619170064345]
+    ], { color: 'darkorange', fillColor: 'orange', fillOpacity: 0.5 }).addTo(map)
+      .bindPopup("Zona Tsunami Sedang");
+
+    var zonaRendah = L.polygon([
+      [-7.002916808170778, 106.54154515386834], 
+      [-6.993263823541074, 106.54889811786467], 
+      [-6.981349799141045, 106.54702447081843], 
+      [-6.976943894532362, 106.53614229655251],
+      [-6.978628287628494, 106.53116094396881],
+      [-6.977611907623991, 106.53651706771333],
+      [-6.981755596875542, 106.54615809045359],
+      [-6.992420680217851, 106.54781574643445]
+    ], { color: 'goldenrod', fillColor: 'yellow', fillOpacity: 0.4 }).addTo(map)
+      .bindPopup("Zona Tsunami Rendah");
+
+    var zonaSangatRendah = L.polygon([
+      [-7.002916808170778, 106.54154515386834], 
+      [-6.993343027564504, 106.55020366582787], 
+      [-6.9811827885053725, 106.54822631480619], 
+      [-6.976943894532362, 106.53614229655251],
+      [-6.981349799141045, 106.54702447081843],
+      [-6.993263823541074, 106.54889811786467]
+    ], { color: 'green', fillColor: 'green', fillOpacity: 0.4 }).addTo(map)
+      .bindPopup("Zona Tsunami Sangat Rendah");
+
+    var baseMaps = { "OpenStreetMap": osm, "Satellite": satellite };
+    var overlayMaps = {
+      "Titik Evakuasi": titikLayer,
+      "Jalur Evakuasi 1": jalur1,
+      "Jalur Evakuasi 2": jalur2,
+      "Jalur Evakuasi 3": jalur3,
+      "Jalur Evakuasi 4": jalur4,
+      "Zona Tsunami Tinggi": zonaTinggi,
+      "Zona Tsunami Sedang": zonaSedang,
+      "Zona Tsunami Rendah": zonaRendah,
+      "Zona Tsunami Sangat Rendah": zonaSangatRendah
+    };
+
+    L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+
+    // ===========================
+    // LEGENDA
+    // ===========================
+
+    var legend = L.control({position: 'bottomright'});
+    legend.onAdd = function () {
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Tinggi Zona Tsunami</b><br>";
+      div.innerHTML += '<i style="background:red"></i> Tinggi     (10 - 20M)<br>';
+      div.innerHTML += '<i style="background:orange"></i> Sedang      (3 - 10M)<br>';
+      div.innerHTML += '<i style="background:yellow"></i> Rendah      (0.5 - 3M)<br>';
+      div.innerHTML += '<i style="background:green"></i> Sangat Rendah      (0 - 0.5M)<br>';
+      return div;
+    };
+    legend.addTo(map);
+
+  </script>
+</body>
+</html>
